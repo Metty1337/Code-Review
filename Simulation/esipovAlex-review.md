@@ -1,5 +1,5 @@
 # Review на реализацию от [@esipovAlex](https://github.com/esipovAlex) проекта [Симуляция](https://zhukovsd.github.io/java-backend-learning-course/projects/simulation/)
-
+[Сам проект](https://github.com/esipovAlex/simul)
 ## Реализация
 
 Привет, давай сначала пройдемся по твоей реализации:
