@@ -70,7 +70,7 @@
 - синглтон анти-паттерн: нарушает SRP, скрытые зависимости, сложность в тестировании. Стоит явно выражать зависимости
   через конструктор и давать другим их подменять.
 
-```
+```java
 // лучше переделать
 public class CurrencyDao {
 
@@ -84,7 +84,7 @@ public class CurrencyDao {
 - `Optional` для поиска - хорошо.
 - Дублирующийся код можно вынести в вспомогательный метод:
 
-```
+```java
 public Optional<Currency> findByCode(String code) {
             if (resultSet.next()) {
                 return Optional.of(new Currency(
@@ -130,7 +130,7 @@ public Optional<Currency> findByCode(String code) {
 - синглтон анти-паттерн: нарушает SRP, скрытые зависимости, сложность в тестировании. Стоит явно выражать зависимости
   через конструктор и давать другим их подменять.
 
-```
+```java
 // лучше переделать
 public class ExchangeRateDao {
 
@@ -152,7 +152,7 @@ CurrencyService:
 - синглтон анти-паттерн: нарушает SRP, скрытые зависимости, сложность в тестировании. Стоит явно выражать зависимости
   через конструктор и давать другим их подменять.
 
-```
+```java
 // лучше переделать
 public class CurrencyService {
 
@@ -168,7 +168,7 @@ public class CurrencyService {
 - Также для сервиса название `create` подходит больше, чем `save`.
 - Скрывая детали реализации, делай код более удобочитабельным, пользуясь вспомогательными методами:
 
-```
+```java
     public CurrencyResponseDto getCurrencyByCode(String code) {
         String normalizedCode = code.trim().toUpperCase();
         Currency currency = CURRENCY_DAO.findByCode(normalizedCode).
@@ -231,7 +231,7 @@ ExchangeRateService:
 - синглтон анти-паттерн: нарушает SRP, скрытые зависимости, сложность в тестировании. Стоит явно выражать зависимости
   через конструктор и давать другим их подменять.
 
-```
+```java
 // лучше переделать
 public class ExchangeRateService {
 
@@ -246,7 +246,7 @@ public class ExchangeRateService {
 
 - Нарушение инкапсуляции - стоит использовать сервис, который уже инкапсулирует работу с ДАО:
 
-```
+```java
 public class ExchangeRateService {
     private static final CurrencyDao CURRENCY_DAO = CurrencyDao.getInstance();
 
@@ -257,7 +257,7 @@ public class ExchangeRateService {
 
 - Интересная реализация с целью не дублировать курсы, но есть места, которые можно облегчить:
 
-```
+```java
     public ExchangeRateResponseDto findByCodes(String baseCode, String targetCode) {
         CurrencyPair pair = getPair(baseCode, targetCode);
         CanonicalContext context = getCanonical(pair.base, pair.target);
@@ -342,7 +342,7 @@ ExchangeService:
 - синглтон анти-паттерн: нарушает SRP, скрытые зависимости, сложность в тестировании. Стоит явно выражать зависимости
   через конструктор и давать другим их подменять.
 
-```
+```java
 // лучше переделать
 public class ExchangeService {
 
@@ -358,7 +358,7 @@ public class ExchangeService {
 - Метод `BigDecimal resolveRate(String baseCode, String targetCode)` содержит анти-паттерн "exceptions as control flow",
   стоит переделать через вспомогательные методы, которые будут возвращать `Optional`:
 
-```
+```java
     private BigDecimal resolveRate(String baseCode, String targetCode) {
         try {
             return EXCHANGE_RATE_SERVICE.findByCodes(baseCode, targetCode).rate();
@@ -395,7 +395,7 @@ private Optional<BigDecimal> findCrossRate(String baseCode, String targetCode){
 
 - Скрывай детали реализации, делай код более удобочитабельным:
 
-```
+```java
         BigDecimal convertedAmount = amount.multiply(rate).setScale(2, RoundingMode.HALF_UP);
 
 // лучше
@@ -421,7 +421,7 @@ private Optional<BigDecimal> findCrossRate(String baseCode, String targetCode){
 
 - Все сообщения об исключения должны быть написаны на английском:
 
-```
+```java
 public class CurrencyNotFoundException extends RuntimeException {
     public CurrencyNotFoundException(String code) {
         super("Валюта с кодом %s не найдена".formatted(code));
