@@ -36,7 +36,7 @@ worldWidth -> width
 - Неправильное название - методы, которые начинаются с `set` в первую очередь сеттеры, а в данном случае он добавляет
   `Entity` на карту:
 
-```
+```java
 void setEntity(Coordinates coordinates, Entity entity)
 
 // лучше
@@ -45,7 +45,7 @@ void putEntity(Coordinates coordinates, Entity entity)
 
 - Почему бы сразу не передавать Coordinates в аргументах, тем самым делая метод проще:
 
-```
+```java
     public boolean isCellEmpty(int x, int y) {
         return !entityMap.containsKey(new Coordinates(x, y));
     }
@@ -58,7 +58,7 @@ void putEntity(Coordinates coordinates, Entity entity)
 
 - Можно упростить метод, используй разные циклы по назначению:
 
-```
+```java
     public Coordinates getRandomEmptyCoordinates() {
         for (int i = 0; i < 100; i++) {
             int x = random.nextInt(worldLength);
@@ -100,7 +100,7 @@ void putEntity(Coordinates coordinates, Entity entity)
 
 - Сообщение об исключении пиши только по-английски:
 
-```
+```java
     private Coordinates findAnyEmptyCoordinate() {
 // ...
         throw new NoEmptyCellsException("Карта полностью заполнена");
@@ -114,7 +114,7 @@ void putEntity(Coordinates coordinates, Entity entity)
 
 - Нарушение Java-конвенции - приватный метод стоит выше публичного:
 
-```
+```java
 private Coordinates findAnyEmptyCoordinate() {}
 
 public boolean isValidCoordinate(Coordinates coordinates) {}
@@ -123,7 +123,7 @@ public boolean isValidCoordinate(Coordinates coordinates) {}
 - В классе есть метод `isValidCoordinate`, но он не используется в самом классе в подходящие для этого методы, где стоит
   проверить координату перед ее использованием:
 
-```
+```java
     public void removeEntity(Coordinates coordinates) {
         entityMap.remove(coordinates);
     }
@@ -142,7 +142,7 @@ public boolean isValidCoordinate(Coordinates coordinates) {}
   метода - он возвращает `boolean`, хотя результат никогда не используется - стоит сделать метод void. А при
   невозможности хода выбрасывать исключение:
 
-```
+```java
     public boolean moveEntity(Coordinates from, Coordinates to, Entity entity) {
         Optional <Entity> entityAtSource = getEntity(from);
         if (entityAtSource.isEmpty() || entityAtSource.get() != entity) {
@@ -182,7 +182,7 @@ public boolean isValidCoordinate(Coordinates coordinates) {}
   утилитарным спорное решение, ведь ты не сможешь выделить интерфейс для него и подменять в дальнейшем реализацию.
 - Иметь свой связный список - хорошо, а также ему можно дать проще название и превратить в record:
 
-```
+```java
     private static class PathNode {
         final Coordinates coordinates;
         final PathNode parent;
@@ -200,7 +200,7 @@ public boolean isValidCoordinate(Coordinates coordinates) {}
 
 - Не стоит передавать `null` в конструктор, лучше создать отдельный конструктор с одним аргументом:
 
-```
+```java
         queue.add(new PathNode(start, null));
 
 // лучше
@@ -219,7 +219,7 @@ public boolean isValidCoordinate(Coordinates coordinates) {}
   `EntityType` для поиска экземпляра нужного класса, но нюанс в том, что реализовать это можно инструментами уже
   встроенными в язык, используя полиморфизм нашего абстрактного `Entity` и его наследников:
 
-```
+```java
 public static List<Coordinates> findPath(WorldMap worldMap, Coordinates start, EntityType targetType) {
 // ...
                 if (entity.isPresent() && entity.get().getType() == targetType) {
@@ -240,7 +240,7 @@ public static List<Coordinates> findPath(WorldMap worldMap, Coordinates start, E
 - В `enum EntityType` спрайты стоит сделать константами через конструктор, чтобы никто не мог их перезаписать, и назвать
   более конкретно - например`EntitySprite`:
 
-```
+```java
 public enum EntityType {
     HERBIVORE,
     PREDATOR,
@@ -294,7 +294,7 @@ public enum EntitySprite {
 
 - Магические числа - стоит заменить на константу с содержательным именем:
 
-```
+```java
     public Herbivore() {
         super(EntityType.HERBIVORE);
         this.energy = 9; 
@@ -317,7 +317,7 @@ public enum EntitySprite {
 
 - Присваивать значения полям все же лучше через конструктор класса выше, а не напрямую:
 
-```
+```java
     public Herbivore() {
         super(EntityType.HERBIVORE);
         this.energy = 9;
@@ -339,7 +339,7 @@ public enum EntitySprite {
   зависимости. Стоит обратиться к _Dependency Injection_ подходу, благодаря которому ясно видно какие зависимости есть у
   класса:
 
-```
+```java
 public Herbivore() {
     super(EntityType.HERBIVORE, 9, 0);
     this.herbivoreMove = new HerbivoreMove();
@@ -361,7 +361,7 @@ public Herbivore(HerbivoreMove herbivoreMove, HerbivoreReproduction herbivoreRep
 - По конструктору такой же комментарий, что и `Herbivore`.
 - Старайся держать в одном методе один уровень абстракции, пользуйся вспомогательными методами, чтобы скрыть детали:
 
-```
+```java
     @Override
     public void makeMove(WorldMap worldMap) {
         predatorMove.move(this, worldMap);
@@ -384,7 +384,7 @@ public Herbivore(HerbivoreMove herbivoreMove, HerbivoreReproduction herbivoreRep
 
 - Нарушение _DRY_:
 
-```
+```java
     @Override
     public void makeMove(WorldMap worldMap) {
 // ...
@@ -424,7 +424,7 @@ public Herbivore(HerbivoreMove herbivoreMove, HerbivoreReproduction herbivoreRep
 
 - Стоит более точно давать имена аргументам:
 
-```
+```java
 public void hunt(Creature creature, WorldMap worldMap)
 
 // лучше
@@ -434,7 +434,7 @@ public void hunt(Creature target, WorldMap worldMap)
 - Неверный модификатор доступа у `protected void moveToTarget`- должен быть `private`.
 - Если есть возможность избежать комментариев, переписав код лучше, то стоит этим воспользоваться:
 
-```
+```java
     protected void moveToTarget(Creature creature, Coordinates targetStep, WorldMap worldMap) {
         Optional<Coordinates> currentPos = worldMap.getEntityCoordinate(creature);
         if (currentPos.isEmpty()) {
@@ -477,7 +477,7 @@ public void hunt(Creature target, WorldMap worldMap)
 
 - Неправильная реакция на отсутствие координат, стоит выбрасывать исключение:
 
-```
+```java
         Optional<Coordinates> currentPos = worldMap.getEntityCoordinate(creature);
         if (currentPos.isEmpty()) {
             return;
@@ -493,7 +493,7 @@ public void hunt(Creature target, WorldMap worldMap)
 
 - Скрывай детали реализации, пользуйся вспомогательными методами:
 
-```
+```java
     public void renderWorld(WorldMap worldMap) {
         int countSprite = worldMap.getWorldWidth();
         printBorderLine('╔', '╗', countSprite);
@@ -551,7 +551,7 @@ public void hunt(Creature target, WorldMap worldMap)
 
 #### class EatAction:
 - Нарушение полиморфизма - у нас и так есть `Creature extends Entity`, мы можем просто пройтись по списку и поискать `Creature` и вызвать соответствующий метод. Именно за этим и нужен полиморфизм:
-```
+```java
 public class EatAction implements Actions{
     @Override
     public void execute(WorldMap worldMap) {
@@ -587,7 +587,7 @@ public class EatAction implements Actions{
 - Конструктор стоит ниже метода - нарушение _Java_ конвенции.
 - Приватный элемент стоит выше публичного - нарушение _Java_ конвенции.
 - Два параллельных массива довольно хрупко - все держится на совпадении индексов: идеально для таких случаев подходит ассоциативный массив. Если хочется иметь свою фабрику, но в пределах одного класса, то в данном случае проще обойтись `Supplier<Entity>`. В целом, кмк, чище создать отдельный `EntityFactory`, но, так или иначе, можно улучшить текущий код:
-```
+```java
 public class InitAction implements Actions {
     private final int[] counts = new int[EntityType.values().length - 1];
     private final EntityFactory[] factories = new EntityFactory[EntityType.values().length - 1];
@@ -634,11 +634,11 @@ public class InitAction implements Actions {
 - Метод `void showStatus` содержит логику симуляции. Метод должен принимать состояние игры и только рендерить, иначе нарушает `SRP`.
 #### class Simulation:
 - Поле без модификатора доступа - нарушение инкапсуляции:
-```
+```java
     MapConsoleRenderer mapConsoleRenderer = new MapConsoleRenderer();
 ```
 - `final` поля стоят ниже _instance_-полей - нарушение _Java_ конвенции:
-```
+```java
     private final WorldMap worldMap;
     private int currentTurn = 0; <- ошибка
 
@@ -649,7 +649,7 @@ public class InitAction implements Actions {
 ```
 
 - Лучше конечно не хардкодить, а передавать экшены и настройки в конструктор:
-```
+```java
     public Simulation(int length, int width) {
 
         this.worldMap = new WorldMap(length, width);
@@ -664,7 +664,7 @@ public class InitAction implements Actions {
 ```
 - Неправильный модификатор доступа `public void initialize()`.
 - Подразумевается, что initActions список и он будет расширен, так что лучше пройтись по всему списку, даже если там один элемент:
-```
+```java
     public void initialize() {
         initActions.getLast().execute(worldMap);
     }
@@ -678,13 +678,13 @@ public class InitAction implements Actions {
 ```
 - Метод `public void startGame()` находится ниже многих приватных метод - нарушение _Java_ конвенции.
 - Магические числа, стоит заменить внятной константой:
-```
+```java
         if (mode.equals("1")) {
             stepByStepSimulation(scanner);
         } else if (mode.equals("2")) {
 ```
 - Вместо анонимных классов лаконичнее использовать _method references_ или лямбды:
-```
+```java
             Thread loopThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
