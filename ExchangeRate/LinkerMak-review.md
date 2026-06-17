@@ -1,4 +1,4 @@
-# Review на реализацию в рамках учебной подписки от [@LinkerMak](https://github.com/LinkerMak) проекта [Обмен валют](https://zhukovsd.github.io/java-backend-learning-course/projects/currency-exchange/)
+# Review на реализацию от [@LinkerMak](https://github.com/LinkerMak) проекта [Обмен валют](https://zhukovsd.github.io/java-backend-learning-course/projects/currency-exchange/)
 
 [Сама реализация](https://github.com/LinkerMak/CurrencyEx)
 
