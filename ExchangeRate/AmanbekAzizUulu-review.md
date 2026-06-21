@@ -23,7 +23,7 @@
 - Имхо - более идиоматичным названием для метода, который сохраняет сущность, является `save()`, а не `persist()`.
 - Неожиданное проглатывание исключений, стоит оборачивать SQL исключение в исключение, понятное верхним слоям:
 
-```
+```java
 		} catch (SQLException e) {
 			LOGGER.error("Error fetching all currencies", e); 
 		}
@@ -37,7 +37,7 @@
 
 - Заметил, что часто переиспользуешь сеттеры, там где можно обойтись лишь одним конструктором:
 
-```
+```java
 				ExchangeRate rate = new ExchangeRate();
 				rate.setId(rs.getLong("id"));
 				rate.setBaseCurrencyId(rs.getLong("base_currency_id"));
@@ -55,7 +55,8 @@
 ```
 
 - Эти самые строки "id", "base_currency_id" и тд каждый раз повторяются, можно вынести их в константы:
-```
+
+```java
 			while (rs.next()) {
 				ExchangeRate rate = new ExchangeRate();
 				rate.setId(rs.getLong("id"));
@@ -75,6 +76,7 @@
 				rates.add(rate);
 			}
 ```
+
 - Круто, что расшифровываешь исключения по SQLState, единственное я бы подумал может стоит вынести условия в отдельный
   метод, класс.
 
@@ -84,7 +86,7 @@
 - Принимаешь DTO, отдаешь DTO - все правильно.
 - Не проще ли в этой ситуации создать отдельный конструктор вместо билдера:
 
-```
+```java
 Currency currency = Currency.builder().code(code).fullName(name).sign(sign).build();
 
 // лучше
@@ -93,7 +95,7 @@ Currency currency = new Currency(code, name, sign)
 
 - Валидация входных данных - ответственность контроллера, а не сервиса:
 
-```
+```java
 try {
 			if (!isValidCurrencyFullName(name)) {
 				throw new InvalidCurrencyFullNameException("Invalid currency full name: " + request.name());
@@ -109,7 +111,7 @@ try {
 
 - Неожиданные sout вместо логгера:
 
-```
+```java
 		} catch (DataAccessException e) {
 			System.out.println("DataAccessException");
 			throw new InternalServerErrorException("Database error", e);
@@ -118,7 +120,7 @@ try {
 
 - Метод, достойный отдельного маппера, странно, что он в сервисе, , то же касается `ExchangeRateService`:
 
-```
+```java
 	private CurrencyResponseDto mapToDto (Currency currency) {
 		return new CurrencyResponseDto(currency.getId(), currency.getFullName(), currency.getCode(), currency.getSign());
 	}
@@ -128,7 +130,7 @@ try {
   же касается `ExchangeRateService`.
 - Часто встречаю неимоверно длинные строчки, где интуитивно необходим хотя бы один Enter:
 
-```
+```java
 Currency target = currencyDao.findByCode(request.targetCurrencyCode().toUpperCase()).orElseThrow( () -> new TargetCurrencyNotFoundException(request.targetCurrencyCode()));
 
 // лучше
@@ -140,7 +142,7 @@ Currency target = currencyDao.findByCode(request.targetCurrencyCode().toUpperCas
   чтобы в этом коде можно было разобраться. В таких случаях стоит заняться декомпозицией - воспользоваться
   вспомогательными методами:
 
-```
+```java
 	public ExchangeResponseDto exchange (String from, String to, BigDecimal amount) {
 		Currency base = currencyDao.findByCode(from).orElseThrow(() -> new BaseCurrencyNotFoundException(from));
 		Currency target = currencyDao.findByCode(to).orElseThrow(() -> new TargetCurrencyNotFoundException(to));
@@ -190,18 +192,25 @@ Currency target = currencyDao.findByCode(request.targetCurrencyCode().toUpperCas
                                              .orElseThrow(() -> ModelNotFoundException(...));}
 	
 ```
+
 ### package controller
 
-- В данный момент зависимости для контроллера получаются путем создания их через конструктор, у этого способа есть очевидные минуса, поэтому советую ознакомится с паттерном Composition Root, в jakarta есть лаконичный способ его реализации.
-- Регистрировал сервлеты как я понял через конфиг (в репе он побитый), но также есть возможность через аннотацию над контроллером, пример `@WebServlet("/currencies")`.
+- В данный момент зависимости для контроллера получаются путем создания их через конструктор, у этого способа есть
+  очевидные минуса, поэтому советую ознакомится с паттерном Composition Root, в jakarta есть лаконичный способ его
+  реализации.
+- Регистрировал сервлеты как я понял через конфиг (в репе он побитый), но также есть возможность через аннотацию над
+  контроллером, пример `@WebServlet("/currencies")`.
 - В остальном вроде все ок.
 
 ### package dto
+
 - Имхо лишние билдеры для рекордов.
 - `RequestDto` звучит как масло масляное, request уже предплогает, что это DTO.
 
 ### package exception
-- Пакеты в Java называют в нижнем регистре (lowercase), используя обратную нотацию доменного имени. То есть вместо `bad-request` - лучше `bad.request` и тд.
+
+- Пакеты в Java называют в нижнем регистре (lowercase), используя обратную нотацию доменного имени. То есть вместо
+  `bad-request` - лучше `bad.request` и тд.
 - Построил удобную иерархию исключений, только минус, что они все жестко привязаны к HTTP.
 
 ## Общее
@@ -213,4 +222,5 @@ Currency target = currencyDao.findByCode(request.targetCurrencyCode().toUpperCas
 - Используй чаще форматирование (ctrl+alt+l в idea) - есть неаккуратные места.
 
 ## Итог
+
 - Неплохой проект, критических замечаний не было, учти нюансы и смело иди дальше. Удачи!
