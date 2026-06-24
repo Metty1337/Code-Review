@@ -14,7 +14,7 @@
 #### package statics 
 
 - Не стоит смешивать модель с представлением, это вызывает жесткую связность с рендером в консоль. В идеале модель вообще не знает каким образом ее будут рендерить, поскольку это ответственность рендера.
-```
+```java
 public class Rock extends Terrain {
 
 	public Rock () {
@@ -25,7 +25,7 @@ public class Rock extends Terrain {
 #### package dynamics
 
 - Класс Creture является родительским для Predator и Herbivore, но там находятся не общие черты этих двух подклассов (speed, hp), там находятся вообще все возможные поля. И получается ситуация, когда у нашего зайца появляется так называемый attackPower.
-```
+```java
 public abstract class Creature extends Entity {
 	private final Behavior behavior;
 	private int speed;
@@ -37,7 +37,7 @@ public abstract class Creature extends Entity {
 	private int nutritionValue;
 ```
 - Инициализировать поля лучше через конструктор, а не через сеттер, если есть такая возможность:
-```
+```java
 	public Herbivore (int speed) {
 		super(EntityRepresentation.HERBIVORE, new HerbivoreBehavior());
 		applyConfig(GameConfig.HERBIVORE_CONFIG);
@@ -64,7 +64,7 @@ public abstract class Creature extends Entity {
 
 - Принято, что приватные методы идут всегда после публичных.
 - Мне не нравится, что карта заполняет сама себя - нарушение SRP. И по ТЗ отдельно прописана роль `initActions` по расставлению сущностей. Также магические числа, которые означают кол-во на спаун объектов лучше вынести в константы, а еще лучше эти значения принимать откуда-то из вне.
-```
+```java
 	public WorldMap (int width, int height) {
 
 		this.width = width;
@@ -98,7 +98,7 @@ public abstract class Creature extends Entity {
 ```
 
 - Используется Optional, чтобы дальше пробросить null, null никогда нельзя возвращать:
-```
+```java
 	public Creature getCreature (Coordinate coordinate) {
 		return Optional.ofNullable(grid.get(coordinate))
 		               .map(Cell::getCreature)
@@ -107,7 +107,7 @@ public abstract class Creature extends Entity {
 ```
 
 - Никогда нельзя возвращать null:
-```
+```java
 	public Coordinate getCreatureCoordinates (Creature creature) {
 		for (var entry : grid.entrySet()) {
 			if (entry.getValue()
@@ -120,7 +120,7 @@ public abstract class Creature extends Entity {
 ```
 
 - Если у нас по координате никто не находится на карте, то мы должны выкинуть исключение, а не возвращать false:
-```
+```java
 	public boolean isPassable (Coordinate coordinate) {
 		if (!isInsideTheWorldMap(coordinate)) {
 			return false;
@@ -166,14 +166,14 @@ public abstract class Creature extends Entity {
 - Класс SimulationEngine - класс Simulation из ТЗ, в ТЗ этот класс описан лучше всего.
 - Отсутствует счетчик ходов по ТЗ.
 - Исключения лучше не игнорировать, и писать о нем на английском:
-```
+```java
 		} catch (IOException e) {
 			System.err.println("Не удалось настроить логирование в файл: " + e.getMessage());
 		}
 ```
 - Отсутствует метод или его аналог pauseSimulation по ТЗ.
 - При InterruptedException обязательно следует восстанавливать флаг:
-```
+```java
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			
@@ -182,7 +182,7 @@ public abstract class Creature extends Entity {
 			Thread.currentThread().interrupt();
 ```
 - По ТЗ в этом классе должно быть 2 списка Actions - initActions, которые вызывались бы перед стартом симуляции и turnActions, которые исполнялись бы каждый ход. Ни того ни другого нет. А для исполнения Action они создаются на месте:
-```
+```java
 	private void performOneStep () {
 		new HungerAction().perform(worldMap);
 		moveCreaturesAction.perform(worldMap);
@@ -200,7 +200,7 @@ public abstract class Creature extends Entity {
 ```
 
 - В конструктор не передается ничего, каждый зависимость зашита внутрь, никак нельзя изменить, лучше конечно передавать из вне хотя бы параметры карты:
-```
+```java
 	public SimulationEngine () {
 		InteractionSystem interactionSystem = new InteractionSystem();
 
@@ -228,7 +228,7 @@ public abstract class Creature extends Entity {
 	}
 ```
 - Также не рекомендуется импортировать статические методы, пусть лучше будет сразу виден источник метода:
-```
+```java
 sleep(100);
 // лучше
 Thread.sleep(100);
